@@ -5,18 +5,24 @@ import subprocess
 import sys
 from datetime import datetime
 
+# Read secret from file
+def read_secret(secret_name):
+    try:
+        f = open('/run/secrets/' + secret_name, 'r', encoding='utf-8')
+    except EnvironmentError:
+        return ''
+    else:
+        with f:
+            return f.readline().strip()
+
 BACKUP_DIR = os.environ["BACKUP_DIR"]
-S3_PATH = os.environ["S3_PATH"]
 DB_NAME = os.environ["DB_NAME"]
-DB_PASS = os.environ["DB_PASS"]
+DB_PASS = os.environ.get("DB_PASS", read_secret('db_password'))
 DB_USER = os.environ["DB_USER"]
 DB_HOST = os.environ["DB_HOST"]
 
 file_name = sys.argv[1]
 backup_file = os.path.join(BACKUP_DIR, file_name)
-
-if not S3_PATH.endswith("/"):
-    S3_PATH = S3_PATH + "/"
 
 def cmd(command):
     try:
@@ -48,9 +54,6 @@ def restore_backup():
         backup_file,
     ))
 
-def download_backup():
-    cmd("aws s3 cp %s%s %s" % (S3_PATH, file_name, backup_file))
-
 def log(msg):
     print "[%s]: %s" % (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), msg)
 
@@ -58,14 +61,13 @@ def main():
     start_time = datetime.now()
     if backup_exists():
         log("Backup file already exists in filesystem %s" % backup_file)
+        log("Restoring database")
+        restore_backup()   
+        log("Restore complete, took %.2f seconds" % (datetime.now() - start_time).total_seconds())
     else:
-        log("Downloading database dump")
-        download_backup()
-    
-    log("Restoring database")
-    restore_backup()
-    
-    log("Restore complete, took %.2f seconds" % (datetime.now() - start_time).total_seconds())
+        log("Backup does not exist")
+        exit 1
+
 
 if __name__ == "__main__":
     main()
