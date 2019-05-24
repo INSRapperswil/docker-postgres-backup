@@ -24,7 +24,7 @@ Restoring a backup
 ==================
 
 This image can also be run as a one off task to restore one of the backups. 
-To do this, we run the container with the command: :code:`/backup/restore.sh [S3-filename]`.
+To do this, we run the container with the command: :code:`/backup/restore.sh [filename]`.
 
 The following environment variables are required:
 
