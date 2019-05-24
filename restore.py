@@ -8,7 +8,7 @@ from datetime import datetime
 # Read secret from file
 def read_secret(secret_name):
     try:
-        f = open('/run/secrets/' + secret_name, 'r', encoding='utf-8')
+        f = open('/run/secrets/' + secret_name, 'r')
     except EnvironmentError:
         return ''
     else:
