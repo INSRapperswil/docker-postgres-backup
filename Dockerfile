@@ -1,5 +1,5 @@
-FROM postgres:11.3-alpine
-MAINTAINER Jonatan Heyman <http://heyman.info>
+FROM postgres:10.4-alpine
+MAINTAINER Yannick Zwicker
 
 # Install dependencies
 RUN apk update && apk add --no-cache --virtual .build-deps && apk add \
