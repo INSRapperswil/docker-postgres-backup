@@ -1,4 +1,4 @@
-FROM postgres:11.3-alpine
+FROM postgres:12.3-alpine
 MAINTAINER Jonatan Heyman <http://heyman.info>
 
 # Install dependencies
