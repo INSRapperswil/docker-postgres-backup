@@ -2,13 +2,11 @@ FROM postgres:12.3-alpine
 MAINTAINER Jonatan Heyman <http://heyman.info>
 
 # Install dependencies
-RUN apk update && apk add --no-cache --virtual .build-deps && apk add \
-    bash make curl openssh git 
+RUN apk update && apk add --no-cache \
+    bash make curl openssh git python3
 
-# Install aws-cli
-RUN apk -Uuv add groff less python py-pip && pip install awscli
 # Cleanup
-RUN apk --purge -v del py-pip && rm /var/cache/apk/*
+RUN rm /var/cache/apk/*
 
 
 VOLUME ["/data/backups"]
