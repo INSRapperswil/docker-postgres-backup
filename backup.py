@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import os
 import subprocess
@@ -25,38 +25,34 @@ WEBHOOK_METHOD = os.environ.get("WEBHOOK_METHOD") or "GET"
 KEEP_BACKUP_DAYS = int(os.environ.get("KEEP_BACKUP_DAYS", 30))
 
 dt = datetime.now()
-file_name = DB_NAME + "_" + dt.strftime("%Y-%m-%d")
+file_name = f'{DB_NAME}_{dt:%Y-%m-%d}'
 backup_file = os.path.join(BACKUP_DIR, file_name)
 
 def cmd(command):
     try:
         subprocess.check_output([command], shell=True, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
-        sys.stderr.write("\n".join([
-            "Command execution failed. Output:",
-            "-"*80,
-            e.output,
-            "-"*80,
-            ""
-        ]))
+        sys.stderr.write(
+            f'Command execution failed. Output:\n'
+            f'--------------\n'
+            f'{e.output}\n'
+            f'--------------\n'
+            f''
+        )
         raise
 
 def backup_exists():
     return os.path.exists(backup_file)
 
 def take_backup():
-    #if backup_exists():
-    #    sys.stderr.write("Backup file already exists!\n")
-    #    sys.exit(1)
-    
-    # trigger postgres-backup
-    cmd("env PGPASSWORD=%s pg_dump -Fc -h %s -U %s %s > %s" % (DB_PASS, DB_HOST, DB_USER, DB_NAME, backup_file))
+    cmd(f'env PGPASSWORD={DB_PASS} pg_dump -Fc -h {DB_HOST} -U {DB_USER} {DB_NAME} > {backup_file}')
 
 def prune_local_backup_files():
+    cmd(f'find {BACKUP_DIR} -type f -prune -mtime +{KEEP_BACKUP_DAYS} -exec rm -f {{}} \;')
     cmd("find %s -type f -prune -mtime +%i -exec rm -f {} \;" % (BACKUP_DIR, KEEP_BACKUP_DAYS))
 
 def log(msg):
-    print "[%s]: %s" % (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), msg)
+    print(f'[{datetime.now():%Y-%m-%d %H:%M:%S}]: {msg}')
 
 def main():
     start_time = datetime.now()
@@ -66,10 +62,10 @@ def main():
     prune_local_backup_files()
     
     if WEBHOOK:
-        log("Making HTTP %s request to webhook: %s" % (WEBHOOK_METHOD, WEBHOOK))
-        cmd("curl -X %s %s" % (WEBHOOK_METHOD, WEBHOOK))
+        log(f'Making HTTP {WEBHOOK_METHOD} request to webhook: {WEBHOOK}')
+        cmd(f'curl -X {WEBHOOK_METHOD} {WEBHOOK}')
     
-    log("Backup complete, took %.2f seconds" % (datetime.now() - start_time).total_seconds())
+    log(f'Backup complete, took {(datetime.now() - start_time).total_seconds():.2f} seconds')
 
 
 if __name__ == "__main__":

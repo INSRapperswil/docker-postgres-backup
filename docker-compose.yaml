@@ -1,0 +1,25 @@
+version: '3.7'
+services:
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+    networks:
+      - db
+  postgres-backup:
+    image: hsrnetwork/postgres-backup:latest
+    environment:
+      CRON_SCHEDULE: "* * * * *"
+      DB_HOST: postgres
+      DB_PASS: mysecretpassword
+      DB_USER: postgres
+      DB_NAME: postgres
+    volumes:
+      - ~/backup:/data/backups
+    networks:
+      - db
+
+networks:
+  db:
