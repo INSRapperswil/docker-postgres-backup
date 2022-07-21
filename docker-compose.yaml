@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   postgres:
-    image: postgres:latest
+    image: postgres:14.4
     environment:
       POSTGRES_PASSWORD: mysecretpassword
       POSTGRES_USER: postgres
@@ -9,7 +9,7 @@ services:
     networks:
       - db
   postgres-backup:
-    image: hsrnetwork/postgres-backup:latest
+    image: insost/postgres-backup:14.4
     environment:
       CRON_SCHEDULE: "* * * * *"
       DB_HOST: postgres

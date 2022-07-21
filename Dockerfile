@@ -1,5 +1,4 @@
-FROM postgres:12.3-alpine
-MAINTAINER Jonatan Heyman <http://heyman.info>
+FROM postgres:14.4-alpine
 
 # Install dependencies
 RUN apk update && apk add --no-cache \
